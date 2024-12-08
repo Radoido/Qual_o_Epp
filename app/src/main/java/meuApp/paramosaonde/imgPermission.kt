@@ -1,64 +1,19 @@
 package meuApp.paramosaonde
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
-import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
-import androidx.core.view.ViewCompat
-import androidx.core.view.ViewPropertyAnimatorListenerAdapter
-import androidx.core.view.WindowInsetsCompat
-import meuApp.paramosaonde.databinding.ActivityCreateEditContentBinding
 import java.io.File
 import java.io.FileOutputStream
 
-class CreateEditContent : AppCompatActivity() {
-    private lateinit var binding: ActivityCreateEditContentBinding
+class imgPermission {
 
-
-    private lateinit var adapter: ArrayAdapter<Show>
-    private lateinit var listShows: ArrayList<Show>
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        binding = ActivityCreateEditContentBinding.inflate(layoutInflater)
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(binding.crudContent)
-
-
-        val db = DAO(this)
-        listShows = ArrayList<Show>()
-
-        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, listShows)
-        binding.listShows.adapter = adapter
-
-        binding.listShows.setOnItemClickListener { _, _, position, _ ->
-            val listShow = listShows[position]
-            binding.edtShow.setText(listShow.title)
-            binding.edtEp.setText(listShow.ep.toString())
-            binding.btnImg.setImageURI(listShow.imgUri.toUri())
-
-        }
-
-        binding.btnSave.setOnClickListener{
-            val title = binding.edtShow.text.toString()
-            val ep = binding.edtEp.text.toString()
-            var imgUri = binding.btnImg.toString()
-            if (imgUri.isNullOrEmpty()){
-                imgUri = R.drawable.anime_placeholder.toString()
-            }
-
-            val result = db.addShow(title, imgUri, ep)
-        }
-
-    }
-
+    private var imgUri: Uri? = null
+    private var onImageSelected: ((Uri?) -> Unit)? = null
 
     private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
@@ -115,7 +70,7 @@ class CreateEditContent : AppCompatActivity() {
                 }
             }
 
-            Toast.makeText(this, "Imagem salva com sucesso!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Imagem carregada com sucesso!", Toast.LENGTH_SHORT).show()
             imgUri = Uri.fromFile(newFile)  // Salva a URI da imagem para referência futura
 
         } catch (e: Exception) {
