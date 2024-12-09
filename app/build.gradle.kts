@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "meuApp.paramosaonde"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "meuApp.paramosaonde"

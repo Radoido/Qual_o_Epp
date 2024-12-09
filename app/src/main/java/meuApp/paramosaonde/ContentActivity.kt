@@ -22,11 +22,13 @@ class ContentActivity : AppCompatActivity() {
         val db = DAO(this)
         val title = intent.getStringExtra("title")
         val imgUri = intent.getStringExtra("imgUri")
-        val ep = intent.getStringExtra("ep")
-        val id = intent.getIntExtra("id", 0)
+        val ep = intent.getIntExtra("ep",0)
+        Toast.makeText(this, "episodio: $ep", Toast.LENGTH_SHORT).show()
+        val id = intent.getIntExtra("id",0 )
+
 
         binding.txtShow.text = title
-        binding.txtEp.text = ep
+        binding.txtEp.text = ep.toString()
         binding.imgShow.setImageURI(Uri.parse(imgUri))
 
         binding.btnBack.setOnClickListener {
@@ -35,13 +37,19 @@ class ContentActivity : AppCompatActivity() {
 
 
         binding.btnIncrement.setOnClickListener{
-            var ep = binding.txtEp.text.toString().toInt()
-            ep++
-            binding.txtEp.text = ep.toString()
-            val result = db.updateEp(ep, id)
+            var ep = binding.txtEp.text.toString()
+            ep = ep.substringAfter("Episódio: ").trim()
+            var epInt = ep.toInt()
+            epInt++
+
+            // Utiliza also, ver como funciona
+            epInt.toString().also { binding.txtEp.text = it }
+            val result = db.updateEp(epInt, id)
+
 
             if (result == 1){
                 Toast.makeText(this, "Episodio incrementado", Toast.LENGTH_SHORT).show()
+                binding.txtEp.text = ("Episódio: $epInt")
             }else{
                 Toast.makeText(this, "Erro ao incrementar", Toast.LENGTH_SHORT).show()
             }
@@ -49,10 +57,12 @@ class ContentActivity : AppCompatActivity() {
         }
 
         binding.btnDecrement.setOnClickListener {
-            var ep = binding.txtEp.text.toString().toInt()
-            ep--
-            binding.txtEp.text = ep.toString()
-            val result = db.updateEp(ep, id)
+            var ep = binding.txtEp.text.toString()
+            ep = ep.substringAfter("Episódio: ").trim()
+            var epInt = ep.toInt()
+            epInt--
+            binding.txtEp.text = epInt.toString()
+            val result = db.updateEp(epInt, id)
 
             if (result == 1){
                 Toast.makeText(this, "Episodio decrementado", Toast.LENGTH_SHORT).show()

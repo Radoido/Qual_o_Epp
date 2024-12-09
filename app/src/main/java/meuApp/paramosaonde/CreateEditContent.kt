@@ -1,5 +1,6 @@
 package meuApp.paramosaonde
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -17,23 +18,28 @@ import androidx.core.view.WindowInsetsCompat
 import meuApp.paramosaonde.databinding.ActivityCreateEditContentBinding
 import java.io.File
 import java.io.FileOutputStream
+import java.net.URI
 
 class CreateEditContent : AppCompatActivity() {
+
+    private var imgUri: Uri? = null
+    private var onImageSelected: ((Uri?) -> Unit)? = null
+
     private lateinit var binding: ActivityCreateEditContentBinding
-
-
     private lateinit var adapter: ArrayAdapter<Show>
-    private lateinit var listShows: ArrayList<Show>
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         binding = ActivityCreateEditContentBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(binding.crudContent)
 
 
         val db = DAO(this)
-        listShows = ArrayList<Show>()
+        var listShows = db.getShows()
+        binding.btnImg.setImageResource(R.drawable.anime_placeholder)
+
+
 
         adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, listShows)
         binding.listShows.adapter = adapter
@@ -41,21 +47,97 @@ class CreateEditContent : AppCompatActivity() {
         binding.listShows.setOnItemClickListener { _, _, position, _ ->
             val listShow = listShows[position]
             binding.edtShow.setText(listShow.title)
-            binding.edtEp.setText(listShow.ep.toString())
-            binding.btnImg.setImageURI(listShow.imgUri.toUri())
+            binding.edtEp.setText(listShow.ep)
+            binding.btnImg.setImageURI(Uri.parse(listShows[position].imgUri))
+            binding.txtId.text = ("ID:  ${listShow.id}")
 
         }
 
-        binding.btnSave.setOnClickListener{
+        binding.btnSave.setOnClickListener {
+
+                val title = binding.edtShow.text.toString()
+                val ep = binding.edtEp.text.toString()
+                var uriImage = imgUri.toString()
+
+                val result = db.addShow(title, uriImage, ep)
+                if (result > 0) {
+                    listShows.add(Show(result.toInt(), title, uriImage, ep.toInt()))
+                    adapter.notifyDataSetChanged()
+                    binding.edtShow.text.clear()
+                    binding.edtEp.text.clear()
+                    binding.btnImg.setImageResource(R.drawable.anime_placeholder)
+                    Toast.makeText(this, "Show adicionado", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Erro ao adicionar", Toast.LENGTH_SHORT).show()
+                }
+
+        }
+
+        binding.btnEdit.setOnClickListener{
             val title = binding.edtShow.text.toString()
             val ep = binding.edtEp.text.toString()
             var imgUri = binding.btnImg.toString()
-            if (imgUri.isNullOrEmpty()){
-                imgUri = R.drawable.anime_placeholder.toString()
-            }
+            val id = binding.txtId.text.toString()
+            val idInt = id.substringAfter("ID: ").trim().toInt()
 
-            val result = db.addShow(title, imgUri, ep)
+            if (title.isEmpty() || ep.isEmpty()){
+                Toast.makeText(this, "Selecione o show que deseja editar", Toast.LENGTH_SHORT).show()
+            }else {
+                val result = db.updateShow(title, imgUri, ep, idInt)
+
+                if (result > 0) {
+                    listShows.clear()
+                    listShows = db.getShows()
+                    adapter.notifyDataSetChanged()
+                    binding.edtShow.text.clear()
+                    binding.edtEp.text.clear()
+                    binding.btnImg.setImageResource(R.drawable.anime_placeholder)
+                    binding.txtId.text = ""
+                    Toast.makeText(this, "Show atualizado", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Erro ao atualizar", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
+
+        binding.btnDelete.setOnClickListener{
+            val id = binding.txtId.text.toString()
+            val idInt = id.substringAfter("ID: ").trim().toInt()
+            val result = db.deleteShow(idInt)
+
+            if (result > 0){
+                listShows.clear()
+                listShows = db.getShows()
+                adapter.notifyDataSetChanged()
+
+                binding.edtShow.text.clear()
+                binding.edtEp.text.clear()
+                binding.btnImg.setImageResource(R.drawable.anime_placeholder)
+                binding.txtId.text = ""
+
+                Toast.makeText(this, "Show deletado", Toast.LENGTH_SHORT).show()
+            }else{
+                Toast.makeText(this, "Erro ao deletar", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.btnImg.setOnClickListener {
+            checkMediaPermission { selectedUri ->
+                    if (selectedUri != null) {
+                    binding.btnImg.setImageURI(selectedUri)
+                    //println("Imagem salva em: $selectedUri")
+                } else {
+                    println("Nenhuma imagem foi selecionada.")
+
+                }
+            }
+        }
+
+        binding.btnBack.setOnClickListener{
+            finish()
+        }
+
+        enableEdgeToEdge()
 
     }
 
@@ -115,7 +197,7 @@ class CreateEditContent : AppCompatActivity() {
                 }
             }
 
-            Toast.makeText(this, "Imagem salva com sucesso!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Imagem carregada com sucesso!", Toast.LENGTH_SHORT).show()
             imgUri = Uri.fromFile(newFile)  // Salva a URI da imagem para referência futura
 
         } catch (e: Exception) {

@@ -1,11 +1,14 @@
 package meuApp.paramosaonde
 
+import android.R
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import meuApp.paramosaonde.databinding.ActivityMainBinding
+import kotlin.math.log
 
 
 /*
@@ -36,9 +39,9 @@ class MainActivity : AppCompatActivity() {
 
 
         val db = DAO(this)
-        val listShows = ArrayList<Show>()
-
-        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, listShows)
+        val listShows = db.getShows()
+        binding.txtTitle.text = listShows[1].ep.toString()
+        adapter = ArrayAdapter(this, R.layout.simple_list_item_1, listShows)
         binding.listShows.adapter = adapter
 
         binding.btnAdd.setOnClickListener {
@@ -48,12 +51,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.listShows.setOnItemClickListener { _, _, position, _ ->
-            val listShows = listShows[position]
-            val intent = Intent(this, CreateEditContent::class.java).apply {
-                putExtra("title", listShows.title)
-                putExtra("imgUri", listShows.imgUri)
-                putExtra("ep", listShows.ep)
-                putExtra("id", listShows.id)
+            val listShow = listShows[position]
+            val intent = Intent(this, ContentActivity::class.java).apply {
+                putExtra("title", listShow.title)
+                putExtra("ep", "Episódio: ${listShow.ep}")
+                putExtra("imgUri", listShow.imgUri)
+                putExtra("id", listShow.id)
             }
             startActivity(intent)
 

@@ -8,10 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper
 class DAO(context: Context) : SQLiteOpenHelper(context, "epp.db", null, 1)  {
 
     companion object{
-
-        private const val TABLE_SHOW = "shows"
-
-
+        private const val TABLE_SHOW = "show"
     }
 
     private val createTable = arrayOf(
@@ -50,9 +47,9 @@ class DAO(context: Context) : SQLiteOpenHelper(context, "epp.db", null, 1)  {
     }
 
     // Mostra os shows cadastrados
-    fun getShows(): List<Show>{
-        val shows = mutableListOf<Show>()
+    fun getShows(): ArrayList<Show>{
         val db = this.readableDatabase
+        val listShows: ArrayList<Show> = ArrayList()
         val cursor = db.rawQuery("SELECT * FROM $TABLE_SHOW", null)
         if (cursor.moveToFirst()){
             do {
@@ -60,12 +57,12 @@ class DAO(context: Context) : SQLiteOpenHelper(context, "epp.db", null, 1)  {
                 val title = cursor.getString(1)
                 val imgUri = cursor.getString(2)
                 val ep = cursor.getInt(3)
-                shows.add(Show(id, title, imgUri, ep))
+                listShows.add(Show(id, title, imgUri, ep))
             } while (cursor.moveToNext())
         }
         cursor.close()
         db.close()
-        return shows
+        return listShows
     }
 
     // Atualiza o episodio do show
@@ -79,23 +76,26 @@ class DAO(context: Context) : SQLiteOpenHelper(context, "epp.db", null, 1)  {
     }
 
     // Atualiza o show
-    fun updateShow(title: String, imgUri: String, ep: String, id: Int){
+    fun updateShow(title: String, imgUri: String, ep: String, id: Int): Int{
         val db = this.writableDatabase
         val values = ContentValues()
         values.put("title", title)
         values.put("imgUri", imgUri)
         values.put("ep", ep)
-        db.update("show", values, "id = ?", arrayOf(id.toString()))
+        val result = db.update("show", values, "id = ?", arrayOf(id.toString()))
 
         db.close()
+        return result
+
 
     }
 
     // Deleta o show
-    fun deleteShow(id: Int){
+    fun deleteShow(id: Int): Int{
         val db = this.writableDatabase
-        db.delete("show", "id = ?", arrayOf(id.toString()))
+        val result = db.delete("show", "id = ?", arrayOf(id.toString()))
         db.close()
+        return result
     }
 
     /*
