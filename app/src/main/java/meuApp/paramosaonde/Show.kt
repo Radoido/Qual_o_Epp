@@ -4,7 +4,7 @@ class Show (val id: Int = 0, var title: String = "", var imgUri: String = "", va
 
 
     override fun toString(): String {
-        return "$id - title='$title' | ep=$ep"
+        return "$id - $title | Episódio: $ep"
     }
 
 

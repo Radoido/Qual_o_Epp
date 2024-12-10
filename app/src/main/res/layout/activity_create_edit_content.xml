@@ -47,7 +47,9 @@
                 android:id="@+id/btnImg"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
+                android:scaleType="fitCenter"
                 />
+
         </LinearLayout>
 
         <LinearLayout
@@ -114,7 +116,8 @@
             android:id="@+id/btnSave"
             android:layout_width="105dp"
             android:layout_height="wrap_content"
-            android:text="Salvar" />
+            android:text="Criar" />
+
 
         <Button
             android:id="@+id/btnEdit"

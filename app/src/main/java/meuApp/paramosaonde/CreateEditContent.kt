@@ -38,8 +38,7 @@ class CreateEditContent : AppCompatActivity() {
         val db = DAO(this)
         var listShows = db.getShows()
         binding.btnImg.setImageResource(R.drawable.anime_placeholder)
-
-
+        binding.edtEp.setText("0")
 
         adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, listShows)
         binding.listShows.adapter = adapter
@@ -47,28 +46,35 @@ class CreateEditContent : AppCompatActivity() {
         binding.listShows.setOnItemClickListener { _, _, position, _ ->
             val listShow = listShows[position]
             binding.edtShow.setText(listShow.title)
-            binding.edtEp.setText(listShow.ep)
+            binding.edtEp.setText(listShow.ep.toString())
             binding.btnImg.setImageURI(Uri.parse(listShows[position].imgUri))
             binding.txtId.text = ("ID:  ${listShow.id}")
 
         }
 
         binding.btnSave.setOnClickListener {
-
                 val title = binding.edtShow.text.toString()
                 val ep = binding.edtEp.text.toString()
                 var uriImage = imgUri.toString()
 
-                val result = db.addShow(title, uriImage, ep)
-                if (result > 0) {
-                    listShows.add(Show(result.toInt(), title, uriImage, ep.toInt()))
-                    adapter.notifyDataSetChanged()
-                    binding.edtShow.text.clear()
-                    binding.edtEp.text.clear()
-                    binding.btnImg.setImageResource(R.drawable.anime_placeholder)
-                    Toast.makeText(this, "Show adicionado", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "Erro ao adicionar", Toast.LENGTH_SHORT).show()
+
+
+                if (title.isEmpty()) {
+                    Toast.makeText(this, "Digite o titulo do show", Toast.LENGTH_SHORT).show()
+
+                }else{
+                    val result = db.addShow(title, uriImage, ep)
+                    if (result > 0) {
+                        listShows.add(Show(result.toInt(), title, uriImage, ep.toInt()))
+                        adapter.notifyDataSetChanged()
+                        binding.edtShow.text.clear()
+                        binding.edtEp.text.clear()
+                        binding.txtId.text = "ID: "
+                        binding.btnImg.setImageResource(R.drawable.anime_placeholder)
+                        Toast.makeText(this, "Show adicionado", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this, "Erro ao adicionar", Toast.LENGTH_SHORT).show()
+                    }
                 }
 
         }
@@ -76,13 +82,15 @@ class CreateEditContent : AppCompatActivity() {
         binding.btnEdit.setOnClickListener{
             val title = binding.edtShow.text.toString()
             val ep = binding.edtEp.text.toString()
-            var imgUri = binding.btnImg.toString()
-            val id = binding.txtId.text.toString()
-            val idInt = id.substringAfter("ID: ").trim().toInt()
+            val imgUri = binding.btnImg.toString()
+            val id = binding.txtId.text.toString().substringAfter("ID: ").trim()
+            val idInt = id.toInt()
 
-            if (title.isEmpty() || ep.isEmpty()){
+            if ((id.isEmpty()) || (title.isEmpty()) || (ep.isEmpty())) {
+
                 Toast.makeText(this, "Selecione o show que deseja editar", Toast.LENGTH_SHORT).show()
-            }else {
+
+            }else if (idInt > 0) {
                 val result = db.updateShow(title, imgUri, ep, idInt)
 
                 if (result > 0) {
@@ -92,7 +100,7 @@ class CreateEditContent : AppCompatActivity() {
                     binding.edtShow.text.clear()
                     binding.edtEp.text.clear()
                     binding.btnImg.setImageResource(R.drawable.anime_placeholder)
-                    binding.txtId.text = ""
+                    binding.txtId.text = "ID: "
                     Toast.makeText(this, "Show atualizado", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(this, "Erro ao atualizar", Toast.LENGTH_SHORT).show()
@@ -113,7 +121,7 @@ class CreateEditContent : AppCompatActivity() {
                 binding.edtShow.text.clear()
                 binding.edtEp.text.clear()
                 binding.btnImg.setImageResource(R.drawable.anime_placeholder)
-                binding.txtId.text = ""
+                binding.txtId.text = "ID: "
 
                 Toast.makeText(this, "Show deletado", Toast.LENGTH_SHORT).show()
             }else{
@@ -125,7 +133,6 @@ class CreateEditContent : AppCompatActivity() {
             checkMediaPermission { selectedUri ->
                     if (selectedUri != null) {
                     binding.btnImg.setImageURI(selectedUri)
-                    //println("Imagem salva em: $selectedUri")
                 } else {
                     println("Nenhuma imagem foi selecionada.")
 

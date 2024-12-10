@@ -31,6 +31,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: ArrayAdapter<Show>
     private lateinit var binding: ActivityMainBinding
 
+    override fun onResume() {
+        super.onResume()
+        setContentView(binding.main)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -40,9 +45,11 @@ class MainActivity : AppCompatActivity() {
 
         val db = DAO(this)
         val listShows = db.getShows()
-        binding.txtTitle.text = listShows[1].ep.toString()
+
         adapter = ArrayAdapter(this, R.layout.simple_list_item_1, listShows)
         binding.listShows.adapter = adapter
+        adapter.notifyDataSetChanged()
+
 
         binding.btnAdd.setOnClickListener {
             val intent = Intent(this, CreateEditContent::class.java)
@@ -54,7 +61,7 @@ class MainActivity : AppCompatActivity() {
             val listShow = listShows[position]
             val intent = Intent(this, ContentActivity::class.java).apply {
                 putExtra("title", listShow.title)
-                putExtra("ep", "Episódio: ${listShow.ep}")
+                putExtra("ep", listShow.ep)
                 putExtra("imgUri", listShow.imgUri)
                 putExtra("id", listShow.id)
             }
