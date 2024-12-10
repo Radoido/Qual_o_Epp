@@ -8,4 +8,6 @@ class Show (val id: Int = 0, var title: String = "", var imgUri: String = "", va
     }
 
 
+
+
 }

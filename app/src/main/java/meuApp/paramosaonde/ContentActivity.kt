@@ -1,5 +1,6 @@
 package meuApp.paramosaonde
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
@@ -30,7 +31,9 @@ class ContentActivity : AppCompatActivity() {
         binding.txtShow.text = title
         binding.imgShow.setImageURI(Uri.parse(imgUri))
         binding.txtEp.text = "$ep"
+
         binding.btnBack.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
 

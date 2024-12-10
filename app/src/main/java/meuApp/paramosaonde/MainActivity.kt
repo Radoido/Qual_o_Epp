@@ -4,37 +4,15 @@ import android.R
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import meuApp.paramosaonde.databinding.ActivityMainBinding
-import kotlin.math.log
 
-
-/*
-v1.0
-O sistema deve permitir ao usuário cadastrar um show(mídia no geral)
-O sistema deve permitir ao usuário incrementar e decrementar a contagem de episódios (funcionalidade separada das anotações)
-O sistema deverá permitir ao usuário fazer upload de uma foto para cada show
-O sistema deverá ser escrito em flutter
-O sistema deverá rodar em um sistema operacional android
-O sistema deverá ser disponibilizado para teste alfa no formato .apk
---------------------------
-O sistema deve permitir ao usuário fazer anotações sobre o show
-O sistema deverá mostrar no formato de lista/grid o nome dos show e o contador de episódios como informações de resumo
-Barra de progresso
-
- */
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var adapter: ArrayAdapter<Show>
     private lateinit var binding: ActivityMainBinding
-
-    override fun onResume() {
-        super.onResume()
-        setContentView(binding.main)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,7 +32,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnAdd.setOnClickListener {
             val intent = Intent(this, CreateEditContent::class.java)
             startActivity(intent)
-
+            finish()
         }
 
         binding.listShows.setOnItemClickListener { _, _, position, _ ->

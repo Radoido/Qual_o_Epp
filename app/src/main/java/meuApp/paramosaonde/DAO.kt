@@ -31,7 +31,7 @@ class DAO(context: Context) : SQLiteOpenHelper(context, "epp.db", null, 1)  {
     }
 
     // Adiciona um show
-    fun addShow(title: String, imgUri: String, ep: String): Long{
+    fun addShow(title: String, imgUri: String, ep: Int): Long{
         val db = this.writableDatabase
         val values = ContentValues()
 
@@ -76,7 +76,7 @@ class DAO(context: Context) : SQLiteOpenHelper(context, "epp.db", null, 1)  {
     }
 
     // Atualiza o show
-    fun updateShow(title: String, imgUri: String, ep: String, id: Int): Int{
+    fun updateShow(title: String, imgUri: String, ep: Int, id: Int): Int{
         val db = this.writableDatabase
         val values = ContentValues()
         values.put("title", title)

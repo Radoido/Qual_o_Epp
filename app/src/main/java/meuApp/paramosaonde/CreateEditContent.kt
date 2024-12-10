@@ -1,10 +1,12 @@
 package meuApp.paramosaonde
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -24,6 +26,7 @@ class CreateEditContent : AppCompatActivity() {
 
     private var imgUri: Uri? = null
     private var onImageSelected: ((Uri?) -> Unit)? = null
+    private var p = -1
 
     private lateinit var binding: ActivityCreateEditContentBinding
     private lateinit var adapter: ArrayAdapter<Show>
@@ -43,46 +46,45 @@ class CreateEditContent : AppCompatActivity() {
         adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, listShows)
         binding.listShows.adapter = adapter
 
-        binding.listShows.setOnItemClickListener { _, _, position, _ ->
-            val listShow = listShows[position]
+        binding.listShows.setOnItemClickListener { _, _, p, _ ->
+            this.p = p
+            val listShow = listShows[p]
             binding.edtShow.setText(listShow.title)
             binding.edtEp.setText(listShow.ep.toString())
-            binding.btnImg.setImageURI(Uri.parse(listShows[position].imgUri))
+            binding.btnImg.setImageURI(Uri.parse(listShows[p].imgUri)) 
             binding.txtId.text = ("ID:  ${listShow.id}")
-
+            Toast.makeText(this, "${Uri.parse(listShows[p].imgUri)}", Toast.LENGTH_SHORT).show()
         }
 
         binding.btnSave.setOnClickListener {
-                val title = binding.edtShow.text.toString()
-                val ep = binding.edtEp.text.toString()
-                var uriImage = imgUri.toString()
+            val title = binding.edtShow.text.toString()
+            val ep = binding.edtEp.text.toString().toInt()
+            val uriImage = binding.btnImg.toString()
 
+            if (title.isEmpty()) {
+                Toast.makeText(this, "Digite o titulo do show", Toast.LENGTH_SHORT).show()
 
-
-                if (title.isEmpty()) {
-                    Toast.makeText(this, "Digite o titulo do show", Toast.LENGTH_SHORT).show()
-
-                }else{
-                    val result = db.addShow(title, uriImage, ep)
-                    if (result > 0) {
-                        listShows.add(Show(result.toInt(), title, uriImage, ep.toInt()))
-                        adapter.notifyDataSetChanged()
-                        binding.edtShow.text.clear()
-                        binding.edtEp.text.clear()
-                        binding.txtId.text = "ID: "
-                        binding.btnImg.setImageResource(R.drawable.anime_placeholder)
-                        Toast.makeText(this, "Show adicionado", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(this, "Erro ao adicionar", Toast.LENGTH_SHORT).show()
-                    }
+            }else{
+                val result = db.addShow(title, uriImage, ep)
+                if (result > 0) {
+                    listShows.add(Show(result.toInt(), title, uriImage, ep))
+                    adapter.notifyDataSetChanged()
+                    binding.edtShow.text.clear()
+                    binding.edtEp.text.clear()
+                    binding.txtId.text = "ID: "
+                    binding.btnImg.setImageResource(R.drawable.anime_placeholder)
+                    Toast.makeText(this, "Show adicionado", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Erro ao adicionar", Toast.LENGTH_SHORT).show()
                 }
+            }
 
         }
 
         binding.btnEdit.setOnClickListener{
             val title = binding.edtShow.text.toString()
             val ep = binding.edtEp.text.toString()
-            val imgUri = binding.btnImg.toString()
+            val uriImage = imgUri.toString()
             val id = binding.txtId.text.toString().substringAfter("ID: ").trim()
             val idInt = id.toInt()
 
@@ -91,11 +93,11 @@ class CreateEditContent : AppCompatActivity() {
                 Toast.makeText(this, "Selecione o show que deseja editar", Toast.LENGTH_SHORT).show()
 
             }else if (idInt > 0) {
-                val result = db.updateShow(title, imgUri, ep, idInt)
+                val result = db.updateShow(title, uriImage, ep.toInt(), idInt)
 
                 if (result > 0) {
-                    listShows.clear()
-                    listShows = db.getShows()
+                    listShows[p] = Show(idInt, title, uriImage, ep.toInt())
+
                     adapter.notifyDataSetChanged()
                     binding.edtShow.text.clear()
                     binding.edtEp.text.clear()
@@ -114,8 +116,8 @@ class CreateEditContent : AppCompatActivity() {
             val result = db.deleteShow(idInt)
 
             if (result > 0){
-                listShows.clear()
-                listShows = db.getShows()
+                listShows.removeAt(p)
+                Log.e("teste", "lista de shows: $adapter")
                 adapter.notifyDataSetChanged()
 
                 binding.edtShow.text.clear()
@@ -132,7 +134,8 @@ class CreateEditContent : AppCompatActivity() {
         binding.btnImg.setOnClickListener {
             checkMediaPermission { selectedUri ->
                     if (selectedUri != null) {
-                    binding.btnImg.setImageURI(selectedUri)
+                        handleImageUri(selectedUri)
+                        binding.btnImg.setImageURI(imgUri)
                 } else {
                     println("Nenhuma imagem foi selecionada.")
 
@@ -141,6 +144,7 @@ class CreateEditContent : AppCompatActivity() {
         }
 
         binding.btnBack.setOnClickListener{
+            startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
 
@@ -193,7 +197,7 @@ class CreateEditContent : AppCompatActivity() {
             folder.mkdirs()  // Cria a pasta se não existir
         }
 
-        val fileName = "livro_${System.currentTimeMillis()}.jpg"  // Nome único para o arquivo
+        val fileName = "show_image_${System.currentTimeMillis()}.jpg"  // Nome único para o arquivo
         val newFile = File(folder, fileName)
 
         try {

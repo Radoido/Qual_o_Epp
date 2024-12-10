@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="Gerenciamento de Shows"
-            android:textSize="30dp" />
+            android:textSize="30sp" />
 
     </LinearLayout>
 
@@ -41,13 +41,15 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Insira uma imagem"/>
+                android:text="Insira uma imagem"
+                tools:ignore="HardcodedText" />
 
             <ImageButton
                 android:id="@+id/btnImg"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:scaleType="fitCenter"
+                android:padding="0dp"
                 />
 
         </LinearLayout>
