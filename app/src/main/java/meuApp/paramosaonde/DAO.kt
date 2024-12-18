@@ -76,7 +76,7 @@ class DAO(context: Context) : SQLiteOpenHelper(context, "epp.db", null, 1)  {
     }
 
     // Atualiza o show
-    fun updateShow(title: String, imgUri: String, ep: Int, id: Int): Int{
+    fun updateShow(id: Int, title: String, ep: Int, imgUri: String ): Int{
         val db = this.writableDatabase
         val values = ContentValues()
         values.put("title", title)
